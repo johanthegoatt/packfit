@@ -1,0 +1,10 @@
+{
+  "name": "packfit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Will my bag fit the airline's cabin or hold limit? Type the size and weight, pick the airline, and get a plain yes or no with the exact fix. Runs in the browser, nothing uploaded. With Stow the suitcase.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
