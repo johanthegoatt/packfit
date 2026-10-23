@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Packfit: will my bag fit the airline's limit?</title>
+<meta name="description" content="Type your bag's size and weight and the airline you're on. Packfit tells you if it fits the cabin or hold limit, or exactly how much to trim or lift out, before you get to the gate. With Stow the suitcase.">
+<meta name="theme-color" content="#2f5fd0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='12' y='20' width='40' height='36' rx='7' fill='%23c98a4b' stroke='%236d4a28' stroke-width='3'/%3E%3Cpath d='M25 20v-4a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v4' fill='none' stroke='%236d4a28' stroke-width='3'/%3E%3Crect x='28' y='30' width='8' height='16' rx='2' fill='%232f5fd0'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#result">Skip to the answer</a>
+<header class="top">
+  <h1>Packfit</h1>
+  <p class="lede">Type your bag and the airline you're on. Packfit tells you if it fits, or exactly how much to shave off or lift out, so you find out at home and not at the gate.</p>
+</header>
+
+<main>
+  <section class="card" id="step-bag" aria-labelledby="h-bag">
+    <h2 id="h-bag"><span class="num">1</span> Your bag</h2>
+    <p class="hint">Measure the widest points with the wheels and handles on, the way the airline's sizer does. Pop it on the scales for the weight.</p>
+
+    <div class="toggle-row">
+      <span class="lab">Sizes in</span>
+      <div class="unit-toggle" id="len-unit" role="group" aria-label="Length unit">
+        <button type="button" data-unit="cm" aria-pressed="true">cm</button>
+        <button type="button" data-unit="in" aria-pressed="false">inches</button>
+      </div>
+      <span class="lab">Weight in</span>
+      <div class="unit-toggle" id="wt-unit" role="group" aria-label="Weight unit">
+        <button type="button" data-unit="kg" aria-pressed="true">kg</button>
+        <button type="button" data-unit="lb" aria-pressed="false">lb</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="field"><span>Length <small class="u-len">(cm)</small></span><input id="bag-l" inputmode="decimal" autocomplete="off" placeholder="55"></label>
+      <label class="field"><span>Width <small class="u-len">(cm)</small></span><input id="bag-w" inputmode="decimal" autocomplete="off" placeholder="40"></label>
+      <label class="field"><span>Depth <small class="u-len">(cm)</small></span><input id="bag-h" inputmode="decimal" autocomplete="off" placeholder="20"></label>
+      <label class="field"><span>Weight <small class="u-wt">(kg)</small></span><input id="bag-kg" inputmode="decimal" autocomplete="off" placeholder="9"></label>
+    </div>
+  </section>
+
+  <section class="card" id="step-where" aria-labelledby="h-where">
+    <h2 id="h-where"><span class="num">2</span> Where you're flying</h2>
+    <p class="hint">Pick the airline. The numbers are the published economy ones; your fare or route can differ, so check your own booking too.</p>
+    <label class="field">
+      <span>Airline</span>
+      <select id="airline" aria-label="Airline"></select>
+    </label>
+
+    <div id="custom-wrap" hidden>
+      <p class="hint" style="margin-top:14px">Type what your airline allows. Leave weight blank if they don't weigh that bag.</p>
+      <h3 style="font:700 1rem var(--round);margin:4px 0 6px">Cabin bag limit</h3>
+      <div class="row">
+        <label class="field"><span>Max length <small class="u-len">(cm)</small></span><input id="c-l" inputmode="decimal" autocomplete="off" placeholder="55"></label>
+        <label class="field"><span>Max width <small class="u-len">(cm)</small></span><input id="c-w" inputmode="decimal" autocomplete="off" placeholder="40"></label>
+        <label class="field"><span>Max depth <small class="u-len">(cm)</small></span><input id="c-h" inputmode="decimal" autocomplete="off" placeholder="20"></label>
+        <label class="field"><span>Max weight <small class="u-wt">(kg)</small></span><input id="c-kg" inputmode="decimal" autocomplete="off" placeholder="10"></label>
+      </div>
+      <h3 style="font:700 1rem var(--round);margin:14px 0 6px">Hold bag limit <small style="font-weight:500;color:var(--ink-2)">(three sides added up)</small></h3>
+      <div class="row">
+        <label class="field"><span>Max total <small class="u-len">(cm)</small></span><input id="h-linear" inputmode="decimal" autocomplete="off" placeholder="158"></label>
+        <label class="field"><span>Max weight <small class="u-wt">(kg)</small></span><input id="h-kg" inputmode="decimal" autocomplete="off" placeholder="23"></label>
+      </div>
+    </div>
+
+    <details class="fees" id="fees">
+      <summary>Add what your airline charges for an over bag (optional)</summary>
+      <div class="row">
+        <label class="field"><span>Currency</span>
+          <select id="cur">
+            <option value="$">$ dollar</option>
+            <option value="£">£ pound</option>
+            <option value="€">€ euro</option>
+            <option value="₱">₱ peso</option>
+          </select>
+        </label>
+        <label class="field"><span>Overweight fee</span><input id="fee-weight" inputmode="decimal" autocomplete="off" placeholder="65"></label>
+        <label class="field"><span>Oversize fee</span><input id="fee-size" inputmode="decimal" autocomplete="off" placeholder="75"></label>
+      </div>
+    </details>
+  </section>
+
+  <section class="card result" id="result" aria-labelledby="h-result" tabindex="-1">
+    <h2 id="h-result"><span class="num">3</span> The answer</h2>
+    <p class="sub" id="sub"></p>
+    <div id="cards" aria-live="polite"></div>
+    <p class="empty" id="empty">Type your bag's size above to see if it fits.</p>
+
+    <div class="actions">
+      <button type="button" class="btn" id="copy">Copy the answer</button>
+      <button type="button" class="btn ghost" id="share">Copy a share link</button>
+    </div>
+    <p class="status" id="status" role="status"></p>
+    <p class="fine">A guide, not a promise. Airlines change these limits and vary them by fare, route and cabin, and a gate agent has the final say. Always check your own booking before you fly. Nothing you type leaves this page.</p>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Made by Johan · <a href="https://github.com/johanthegoatt/packfit">Source</a></p>
+</footer>
+
+<div class="stow-dock" id="stow-dock">
+  <div class="bubble" id="stow-bubble" role="status" aria-live="polite"></div>
+  <button type="button" class="stow" id="stow" aria-label="Stow the suitcase. Tap for a tip." data-mood="sleepy">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <g class="s-body">
+        <path class="s-handle" d="M46 26 v-6 a14 14 0 0 1 28 0 v6"/>
+        <rect class="s-case" x="20" y="30" width="80" height="78" rx="15"/>
+        <rect class="s-flap" x="20" y="30" width="80" height="20" rx="15"/>
+        <rect class="s-buckle" x="40" y="42" width="12" height="12" rx="2"/>
+        <rect class="s-buckle" x="68" y="42" width="12" height="12" rx="2"/>
+        <rect class="s-tag" x="82" y="60" width="18" height="12" rx="3"/>
+        <g class="s-face">
+          <g class="s-eyes">
+            <circle class="s-white" cx="48" cy="78" r="11"/>
+            <circle class="s-white" cx="74" cy="78" r="11"/>
+            <circle class="s-pupil" cx="48" cy="78" r="4"/>
+            <circle class="s-pupil" cx="74" cy="78" r="4"/>
+            <path class="s-closed" d="M39 78 q9 6 18 0 M65 78 q9 6 18 0"/>
+          </g>
+          <circle class="s-cheek" cx="37" cy="90" r="4.5"/>
+          <circle class="s-cheek" cx="85" cy="90" r="4.5"/>
+          <path class="s-mouth happy" d="M53 94 q8 7 16 0"/>
+          <path class="s-mouth worried" d="M53 99 q8 -6 16 0"/>
+          <ellipse class="s-mouth wow" cx="61" cy="96" rx="4.5" ry="5.5"/>
+          <path class="s-mouth sleepy" d="M56 95 h10"/>
+        </g>
+      </g>
+    </svg>
+  </button>
+  <button type="button" class="stow-hide" id="stow-hide" aria-label="Hide Stow">×</button>
+</div>
+
+<script src="src/engine.js"></script>
+<script src="src/data.js"></script>
+<script src="src/stow.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>

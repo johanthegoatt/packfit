@@ -1,0 +1,227 @@
+/* Packfit. A check-in-desk calm: warm paper, a boarding-pass blue you read the
+   answer in, amber when a bag is over, green when it fits. Big inputs, a plain
+   yes or no per bag, fine on a phone while you stand on the bathroom scales with
+   a suitcase. Shares the look of the rest of Johan's small tools. */
+
+:root {
+  --bg: #f2f4f7;
+  --surface: #ffffff;
+  --surface-2: #eaeef3;
+  --ink: #1f2430;
+  --ink-2: #586072;
+  --line: #dde2ea;
+  --accent: #2f5fd0;
+  --accent-ink: #ffffff;
+  --accent-soft: #dde6fb;
+  --good: #1f8a5b;
+  --good-soft: #d9f2e5;
+  --warn: #b5701c;
+  --warn-soft: #f7e6ce;
+  --bad: #c23b3b;
+  --bad-soft: #f7dcdc;
+  --shadow: 0 12px 28px -16px rgba(31, 36, 48, 0.42), 0 1px 0 rgba(31, 36, 48, 0.04);
+  --radius: 20px;
+  --radius-s: 12px;
+  --round: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI Variable Display", system-ui, sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #11141b;
+    --surface: #1a1e27;
+    --surface-2: #232834;
+    --ink: #e7eaf1;
+    --ink-2: #a2abbd;
+    --line: #313847;
+    --accent: #7aa0f0;
+    --accent-ink: #0d1016;
+    --accent-soft: #233155;
+    --good: #5fd39c;
+    --good-soft: #1e3a30;
+    --warn: #e6a65e;
+    --warn-soft: #3a2e1a;
+    --bad: #f08a8a;
+    --bad-soft: #3a1e1e;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 var(--body);
+  padding: 0 16px 150px;
+}
+
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 16px; top: 8px; background: var(--surface); padding: 8px 12px; border-radius: 8px; z-index: 10; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.top, main, .foot { max-width: 760px; margin: 0 auto; }
+.top { padding: 32px 0 12px; }
+.top h1 { font: 800 clamp(2rem, 7vw, 2.8rem)/1.05 var(--round); margin: 0; letter-spacing: -0.02em; color: var(--accent); }
+.lede { margin: 8px 0 0; color: var(--ink-2); font-size: 1.05rem; max-width: 42rem; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin: 16px 0;
+}
+.card h2 { font: 700 1.2rem/1.2 var(--round); margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+.card h2 small { font-weight: 500; color: var(--ink-2); font-size: 0.85rem; }
+.num {
+  display: inline-grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent); font-size: 0.95rem;
+}
+.hint { color: var(--ink-2); margin: -4px 0 14px; font-size: 0.95rem; }
+
+.row { display: flex; flex-wrap: wrap; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 140px; min-width: 0; }
+.field > span { font-size: 0.85rem; font-weight: 600; color: var(--ink-2); }
+.field > span small { font-weight: 500; }
+
+input, select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: 10px 12px;
+  min-height: 46px;
+  width: 100%;
+}
+input:focus-visible, select:focus-visible, button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+input[aria-invalid="true"] { border-color: var(--warn); }
+
+/* a cm/in or kg/lb switch sitting next to a number */
+.unit-toggle { display: inline-flex; border: 1.5px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--surface-2); }
+.unit-toggle button {
+  font: 600 0.85rem var(--round); border: 0; background: none; color: var(--ink-2);
+  padding: 6px 12px; min-height: 34px; cursor: pointer;
+}
+.unit-toggle button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.toggle-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 2px 0 14px; }
+.toggle-row .lab { font-size: 0.85rem; font-weight: 600; color: var(--ink-2); }
+
+.fees { margin-top: 12px; }
+.fees summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: 0.95rem; }
+.fees[open] summary { margin-bottom: 12px; }
+
+.sub { color: var(--ink-2); margin: -4px 0 14px; }
+.sub:empty { display: none; }
+
+/* one card per allowance in the result */
+.rescard {
+  border: 1px solid var(--line); border-left: 6px solid var(--line);
+  border-radius: var(--radius-s); padding: 14px 16px; margin: 10px 0;
+  background: var(--surface-2);
+}
+.rescard.fits { border-left-color: var(--good); }
+.rescard.over { border-left-color: var(--warn); }
+.rescard.refused { border-left-color: var(--bad); }
+.rescard-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rescard h3 { margin: 0; font: 700 1.05rem var(--round); flex: 1 1 auto; }
+.verdict { font: 800 0.72rem/1 var(--round); text-transform: uppercase; letter-spacing: 0.05em; padding: 5px 9px; border-radius: 7px; white-space: nowrap; }
+.verdict.fits { background: var(--good-soft); color: var(--good); }
+.verdict.over { background: var(--warn-soft); color: var(--warn); }
+.verdict.refused { background: var(--bad-soft); color: var(--bad); }
+.rescard .lines { margin: 10px 0 0; padding: 0; list-style: none; }
+.rescard .lines li { display: flex; gap: 8px; padding: 4px 0; font-size: 0.95rem; align-items: baseline; }
+.rescard .lines .k { color: var(--ink-2); flex: 0 0 auto; }
+.rescard .lines .v { font-weight: 600; }
+.rescard .lines .v.over { color: var(--warn); }
+.rescard .lines .v.ok { color: var(--good); }
+.rescard .fix { margin: 10px 0 0; font-size: 0.92rem; color: var(--ink); background: var(--surface); border-radius: 8px; padding: 8px 10px; }
+.rescard .note { margin: 8px 0 0; font-size: 0.82rem; color: var(--ink-2); }
+
+.empty { color: var(--ink-2); font-size: 0.95rem; margin: 12px 0 0; }
+.empty[hidden] { display: none; }
+
+.btn {
+  font: 700 1rem var(--round);
+  border: 0; border-radius: 999px;
+  padding: 12px 20px; min-height: 46px;
+  background: var(--accent); color: var(--accent-ink); cursor: pointer;
+}
+.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.btn:active { transform: translateY(1px); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.status { min-height: 1.5em; color: var(--good); font-weight: 600; margin: 8px 0 0; }
+.fine { color: var(--ink-2); font-size: 0.82rem; margin: 10px 0 0; }
+
+.foot { color: var(--ink-2); font-size: 0.9rem; padding: 12px 0; }
+.foot a { color: var(--accent); }
+
+/* Stow, the little suitcase. Buckle and tag whatever the page theme. */
+.stow-dock { position: fixed; right: 16px; bottom: 16px; z-index: 6; display: flex; align-items: flex-end; gap: 6px; transition: right .3s ease; }
+.stow { width: 88px; height: 88px; border: 0; background: none; padding: 0; cursor: pointer; border-radius: 24px; }
+.stow svg { width: 100%; height: 100%; overflow: visible; }
+.stow .s-case { fill: #c98a4b; stroke: #6d4a28; stroke-width: 3.5; }
+.stow .s-flap { fill: #b9793c; stroke: #6d4a28; stroke-width: 3; }
+.stow .s-handle { fill: none; stroke: #6d4a28; stroke-width: 5; stroke-linecap: round; }
+.stow .s-buckle { fill: #f2d8a7; stroke: #6d4a28; stroke-width: 2; }
+.stow .s-tag { fill: #2f5fd0; stroke: #6d4a28; stroke-width: 2; }
+.stow .s-white { fill: #fff; stroke: #3a2a18; stroke-width: 2; }
+.stow .s-pupil { fill: #3a2a18; transition: transform .08s linear; }
+.stow .s-closed { fill: none; stroke: #3a2a18; stroke-width: 3; stroke-linecap: round; display: none; }
+.stow .s-cheek { fill: #e8705a; opacity: .5; }
+.stow .s-mouth { fill: none; stroke: #3a2a18; stroke-width: 3; stroke-linecap: round; display: none; }
+.stow .s-mouth.wow { fill: #3a2a18; stroke: none; }
+.stow[data-mood="happy"] .s-mouth.happy,
+.stow[data-mood="party"] .s-mouth.happy,
+.stow[data-mood="worried"] .s-mouth.worried,
+.stow[data-mood="wow"] .s-mouth.wow,
+.stow[data-mood="sleepy"] .s-mouth.sleepy { display: block; }
+.stow[data-mood="sleepy"] .s-white, .stow[data-mood="sleepy"] .s-pupil { display: none; }
+.stow[data-mood="sleepy"] .s-closed { display: block; }
+.stow.blink .s-white, .stow.blink .s-pupil { transform: scaleY(0.1); transform-box: fill-box; transform-origin: center; }
+.stow .s-body { transform-origin: 60px 60px; animation: bob 3.4s ease-in-out infinite; }
+.stow.hop .s-body { animation: hop .5s ease; }
+.stow.buzz .s-body { animation: buzz .7s ease; }
+.stow[data-mood="party"] .s-body { animation: spin .7s ease; }
+@keyframes bob { 50% { transform: translateY(-3px) rotate(-1.5deg); } }
+@keyframes hop { 40% { transform: translateY(-14px) rotate(-5deg); } 70% { transform: translateY(0) rotate(2deg); } }
+@keyframes buzz { 10%,30%,50%,70% { transform: translateX(-2px) rotate(-3deg); } 20%,40%,60% { transform: translateX(2px) rotate(3deg); } }
+@keyframes spin { 60% { transform: rotate(360deg) scale(1.05); } 100% { transform: rotate(360deg); } }
+
+.bubble {
+  max-width: min(64vw, 280px); background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  box-shadow: var(--shadow); border-radius: 16px 16px 4px 16px; padding: 10px 12px; font-size: 0.92rem; margin-bottom: 56px;
+}
+.bubble:empty { display: none; }
+.bubble.pop { animation: pop .25s ease; }
+@keyframes pop { from { transform: scale(.85); opacity: 0; } }
+.stow-hide {
+  position: absolute; right: -6px; top: -6px; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-2); cursor: pointer; font-size: 1rem; line-height: 1;
+}
+.stow-dock.tucked { right: -56px; opacity: .8; }
+.stow-dock.tucked .stow-hide, .stow-dock.tucked .bubble { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+@media print {
+  body { background: #fff; color: #000; padding: 0; }
+  #step-bag, #step-where, .result .actions, .stow-dock, .foot, .skip, .status { display: none !important; }
+  .card { box-shadow: none; border: 0; }
+}
+
+@media (max-width: 520px) {
+  .stow { width: 72px; height: 72px; }
+  .card { padding: 16px; }
+}
