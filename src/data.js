@@ -27,6 +27,8 @@
       allowances: [
         { name: "Carry-on", type: "cabin", sizeMode: "each", maxCm: [56, 36, 23], maxKg: null,
           note: "22 x 14 x 9 in including wheels and handle. No cabin weight limit on most routes." },
+        { name: "Personal item", type: "personal", sizeMode: "each", maxCm: [46, 36, 20], maxKg: null,
+          note: "18 x 14 x 8 in. The free under-seat bag you get as well as the carry-on, even on Basic Economy." },
         { name: "Checked bag", type: "checked", sizeMode: "linear", maxLinearCm: 158, maxKg: 23,
           note: "62 in total, 50 lb. 51-70 lb pays an overweight fee." }
       ]
@@ -47,6 +49,8 @@
       allowances: [
         { name: "Carry-on", type: "cabin", sizeMode: "each", maxCm: [56, 35, 22], maxKg: null,
           note: "22 x 14 x 9 in including handles and wheels." },
+        { name: "Personal item", type: "personal", sizeMode: "each", maxCm: [43, 25, 23], maxKg: null,
+          note: "17 x 10 x 9 in. The free under-seat bag you get as well as the carry-on." },
         { name: "Checked bag", type: "checked", sizeMode: "linear", maxLinearCm: 158, maxKg: 23,
           note: "62 in total, 50 lb." }
       ]
