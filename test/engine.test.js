@@ -125,3 +125,33 @@ test("compare puts fitting options first, then the smallest fix", function () {
   assert.strictEqual(rows[0].fits, true);
   assert.strictEqual(rows[1].fits, false);
 });
+
+var D = require("../src/data.js");
+
+test("US carriers now carry a free personal item allowance", function () {
+  ["american", "united"].forEach(function (id) {
+    var air = D.byId(id);
+    var pi = air.allowances.filter(function (a) { return a.type === "personal"; });
+    assert.strictEqual(pi.length, 1, id + " has a personal item");
+    assert.strictEqual(pi[0].sizeMode, "each");
+  });
+});
+
+test("a small backpack fits American's personal item but a big one is over", function () {
+  var american = D.byId("american");
+  var pi = american.allowances.find(function (a) { return a.type === "personal"; });
+  // American personal item is 46 x 36 x 20 cm.
+  var ok = E.checkBag({ l: 40, w: 30, h: 15, unit: "cm" }, pi, {});
+  assert.strictEqual(ok.fits, true);
+  assert.strictEqual(ok.type, "personal");
+  var over = E.checkBag({ l: 50, w: 36, h: 22, unit: "cm" }, pi, {});
+  assert.strictEqual(over.fits, false);
+});
+
+test("compare ranks a backpack: fits the personal item, over the carry-on is irrelevant", function () {
+  var united = D.byId("united");
+  var rows = E.compare({ l: 42, w: 24, h: 20, unit: "cm" }, united.allowances, {});
+  // The personal item (43 x 25 x 23) should be among the fitting rows.
+  var pi = rows.find(function (r) { return r.type === "personal"; });
+  assert.ok(pi && pi.fits, "backpack fits United's under-seat personal item");
+});
