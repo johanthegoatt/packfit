@@ -142,7 +142,7 @@
     el.className = "rescard " + cls;
 
     var verdictText = r.refused ? "Too heavy" : (r.fits ? "Fits" : "Over");
-    var typeLabel = r.type === "cabin" ? "cabin" : "hold";
+    var typeLabel = r.type === "cabin" ? "cabin" : r.type === "personal" ? "personal item" : "hold";
 
     var lines = [];
     // size line

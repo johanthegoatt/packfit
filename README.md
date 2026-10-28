@@ -66,6 +66,12 @@ too.
   majors and most full-service carriers.
 - American Airlines, Delta and United: carry-on **22 x 14 x 9 in**
   (56 x 36 x 23 cm), checked 62 in / 50 lb.
+- The free **personal item** (the bag that goes under the seat in front, on
+  top of the carry-on, and the only free bag on a US Basic Economy fare):
+  American **18 x 14 x 8 in** (46 x 36 x 20 cm), United **17 x 10 x 9 in**
+  (43 x 25 x 23 cm). Delta allows a free personal item too but does not publish
+  a size, only that it must fit fully under the seat, so Packfit leaves Delta's
+  as a note rather than a number.
 - British Airways: cabin bag 56 x 45 x 25 cm plus a 40 x 30 x 15 cm handbag,
   23 kg; checked bag each side up to 90 x 75 x 43 cm, 23 kg.
 - Ryanair: a free small bag 40 x 25 x 20 cm; a 55 x 40 x 20 cm 10 kg bag with
