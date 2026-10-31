@@ -96,6 +96,33 @@
     <p class="status" id="status" role="status"></p>
     <p class="fine">A guide, not a promise. Airlines change these limits and vary them by fare, route and cabin, and a gate agent has the final say. Always check your own booking before you fly. Nothing you type leaves this page.</p>
   </section>
+
+  <section class="card" id="step-liquids" aria-labelledby="h-liquids">
+    <h2 id="h-liquids"><span class="num">+</span> Cabin liquids (the 3-1-1 rule)</h2>
+    <p class="sub">Every bottle 100 ml (3.4 oz) or less, and they all fit one small clear bag. It's the size printed on the bottle that counts, not how full it is.</p>
+    <div class="row">
+      <label class="field">
+        <span>Container sizes</span>
+        <input id="liq-list" inputmode="decimal" placeholder="e.g. 100, 75, 50, 100">
+      </label>
+      <label class="field narrow">
+        <span>in</span>
+        <select id="liq-unit">
+          <option value="ml">ml</option>
+          <option value="oz">oz</option>
+        </select>
+      </label>
+      <label class="field narrow">
+        <span>Bag</span>
+        <select id="liq-region">
+          <option value="us">US quart</option>
+          <option value="eu">EU/UK 1 L</option>
+        </select>
+      </label>
+    </div>
+    <div id="liq-out" aria-live="polite"></div>
+    <p class="fine">Separate the sizes with commas. Medicines and baby food are usually allowed over the limit but may be checked on their own, so leave them out here. Rules vary by country and change, so check your airport before you fly.</p>
+  </section>
 </main>
 
 <footer class="foot">

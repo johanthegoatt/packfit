@@ -301,6 +301,29 @@
   // ---- wire up ----
   fillAirlines();
 
+  function recomputeLiquids() {
+    var host = $("liq-out");
+    if (!host) return;
+    var raw = ($("liq-list").value || "").split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
+    if (!raw.length) { host.innerHTML = ""; return; }
+    var containers = raw.map(function (x) { return { ml: parseFloat(x) }; }).filter(function (c) { return isFinite(c.ml) && c.ml > 0; });
+    var r = E.checkLiquids({ region: $("liq-region").value, unit: $("liq-unit").value, containers: containers });
+    if (!r.items.length) { host.innerHTML = ""; return; }
+    var cls = r.ok ? "ok" : "no";
+    var head = r.ok ? "All good for cabin"
+      : !r.allUnderLimit ? (r.oversizeCount + (r.oversizeCount === 1 ? " bottle is" : " bottles are") + " over 100 ml")
+      : "Too much to fit one bag";
+    var pills = r.items.map(function (it) {
+      return '<span class="liq-pill ' + (it.over ? "over" : "under") + '">' + it.ml + ' ml' + (it.over ? " ✕" : "") + '</span>';
+    }).join(" ");
+    var msg;
+    if (!r.allUnderLimit) msg = "Bottles over 100 ml have to go in a checked bag. Only the 100 ml and under ones can come in the cabin bag.";
+    else if (!r.likelyFits) msg = "That's " + r.compliantMl + " ml of liquids. " + r.bagLabel + " realistically holds about " + r.usableMl + " ml of bottles, so some will have to go in the hold.";
+    else msg = "All " + r.compliantCount + " fit the limit and should go in " + r.bagLabel + " (" + r.compliantMl + " ml of " + r.usableMl + " ml usable).";
+    host.innerHTML = '<div class="liq-result ' + cls + '"><div class="liq-head">' + head + '</div>' +
+      '<div class="liq-pills">' + pills + '</div><p class="liq-msg">' + msg + '</p></div>';
+  }
+
   Array.prototype.forEach.call($("len-unit").querySelectorAll("button"), function (b) {
     b.addEventListener("click", function () { setLenUnit(b.getAttribute("data-unit")); recompute(); });
   });
@@ -312,6 +335,7 @@
     $(id).addEventListener("input", recompute);
   });
   $("airline").addEventListener("change", function () { Stow.react("airline"); recompute(); });
+  ["liq-list", "liq-unit", "liq-region"].forEach(function (id) { var e = $(id); if (e) e.addEventListener("input", recomputeLiquids); if (e) e.addEventListener("change", recomputeLiquids); });
   $("cur").addEventListener("change", function () { currency = $("cur").value || "$"; recompute(); });
 
   $("copy").addEventListener("click", function () {
@@ -330,4 +354,5 @@
     $("airline").value = "american";
   }
   recompute();
+  recomputeLiquids();
 })();

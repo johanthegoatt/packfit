@@ -225,3 +225,14 @@ input[aria-invalid="true"] { border-color: var(--warn); }
   .stow { width: 72px; height: 72px; }
   .card { padding: 16px; }
 }
+
+/* ---- cabin liquids (3-1-1) ---- */
+.liq-result { margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.liq-result.ok { border-color: var(--good); background: var(--good-soft); }
+.liq-result.no { border-color: var(--warn); background: var(--warn-soft); }
+.liq-head { font-weight: 800; font-size: 15px; margin-bottom: 8px; }
+.liq-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.liq-pill { font-size: 13px; font-weight: 700; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); }
+.liq-pill.under { color: var(--good); border-color: var(--good); }
+.liq-pill.over { color: var(--bad); border-color: var(--bad); background: var(--bad-soft); }
+.liq-msg { margin: 10px 0 0; font-size: 14px; color: var(--ink-2); }
