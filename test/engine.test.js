@@ -155,3 +155,50 @@ test("compare ranks a backpack: fits the personal item, over the carry-on is irr
   var pi = rows.find(function (r) { return r.type === "personal"; });
   assert.ok(pi && pi.fits, "backpack fits United's under-seat personal item");
 });
+
+test("liquids: all containers under 100 ml and fitting one bag passes", function () {
+  var r = E.checkLiquids({ region: "us", containers: [{ ml: 100, name: "shampoo" }, { ml: 50 }, { ml: 75, name: "toothpaste" }] });
+  assert.strictEqual(r.allUnderLimit, true);
+  assert.strictEqual(r.oversizeCount, 0);
+  assert.strictEqual(r.compliantCount, 3);
+  assert.strictEqual(r.compliantMl, 225);
+  assert.strictEqual(r.likelyFits, true);
+  assert.strictEqual(r.ok, true);
+});
+
+test("liquids: a container over 100 ml is flagged for the hold", function () {
+  var r = E.checkLiquids({ region: "us", containers: [{ ml: 200, name: "sunscreen" }, { ml: 50 }] });
+  assert.strictEqual(r.oversizeCount, 1);
+  assert.strictEqual(r.allUnderLimit, false);
+  assert.strictEqual(r.ok, false);
+  assert.strictEqual(r.items[0].over, true);
+  assert.strictEqual(r.items[1].over, false);
+});
+
+test("liquids: too many small bottles won't fit one bag", function () {
+  var many = [];
+  for (var i = 0; i < 10; i++) many.push({ ml: 100 });
+  var r = E.checkLiquids({ region: "us", containers: many });
+  assert.strictEqual(r.allUnderLimit, true);   // each is fine
+  assert.strictEqual(r.likelyFits, false);     // but 1000 ml won't fit a quart bag
+  assert.strictEqual(r.ok, false);
+});
+
+test("liquids: the EU 1-litre bag fits a little more than the US quart", function () {
+  var eight = [];
+  for (var i = 0; i < 7; i++) eight.push({ ml: 100 });
+  var us = E.checkLiquids({ region: "us", containers: eight });
+  var eu = E.checkLiquids({ region: "eu", containers: eight });
+  assert.strictEqual(us.bagMl, 946);
+  assert.strictEqual(eu.bagMl, 1000);
+  // 700 ml fits the EU bag's usable 700 ml but not the US bag's 662 ml
+  assert.strictEqual(eu.likelyFits, true);
+  assert.strictEqual(us.likelyFits, false);
+});
+
+test("liquids: ounces convert to millilitres", function () {
+  var r = E.checkLiquids({ region: "us", unit: "oz", containers: [{ ml: 3.4, name: "3.4 oz travel bottle" }] });
+  assert.strictEqual(r.items[0].ml, 101);      // 3.4 oz ~ 100.5 ml, rounds to 101
+  // the rules treat 3.4 oz as 100 ml, so the 1 ml of slack lets it pass
+  assert.strictEqual(r.oversizeCount, 0);
+});
