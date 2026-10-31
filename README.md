@@ -34,6 +34,12 @@ that would make it fit.
   lift out N kg.
 - Flags the 32 kg point where a single bag is usually refused, and says to split
   it rather than inventing a fee for it.
+- Checks your cabin liquids against the **3-1-1 rule**: every bottle 100 ml
+  (3.4 oz) or less, and all of them fitting one small clear bag (a US quart, about
+  0.95 L, or the EU/UK 1-litre bag). It reads the size printed on the bottle, not
+  how full it is, flags the ones that have to go in the hold, and warns when even
+  compliant bottles add up to more than one bag will realistically hold. Medicines
+  and baby food, which are usually allowed over the limit, are left out.
 - Optional: type what your airline charges for an over bag and it adds it up. No
   fee is ever made up.
 - A share link that carries the bag and airline in the address, so nothing is
