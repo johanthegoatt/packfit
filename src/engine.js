@@ -179,10 +179,72 @@
     return rows;
   }
 
+  // Cabin liquids, the "3-1-1" rule. Two things have to be true: every
+  // container is 100 ml (3.4 oz) or less, AND they all fit in one small clear
+  // resealable bag (a quart bag in the US, about 0.95 L; a 1-litre bag in the
+  // EU/UK). The size printed on the bottle is what counts, not how full it is,
+  // so a half-used 200 ml bottle still fails. Medicines and baby food are
+  // generally allowed over the limit but may be checked separately, so they're
+  // left out of the count. The bag can't be packed to the brim, so the fit
+  // check allows roughly 70% of the bag to be usable for bottles.
+  var LIQUID_LIMIT_ML = 100;
+  var ML_PER_OZ = 29.5735;
+  var LIQUID_BAGS = {
+    us: { ml: 946, label: "one quart bag (about 0.95 L)" },
+    eu: { ml: 1000, label: "one 1-litre bag" }
+  };
+
+  function toMl(value, unit) {
+    var n = num(value);
+    return unit === "oz" ? n * ML_PER_OZ : n;
+  }
+
+  function checkLiquids(opts) {
+    opts = opts || {};
+    var region = opts.region === "eu" ? "eu" : "us";
+    var bag = LIQUID_BAGS[region];
+    var unit = opts.unit === "oz" ? "oz" : "ml";
+    var list = Array.isArray(opts.containers) ? opts.containers : [];
+
+    var items = [], compliantCount = 0, oversizeCount = 0, compliantMl = 0;
+    list.forEach(function (c) {
+      var raw = c && c.ml != null ? c.ml : c;
+      var ml = toMl(raw, unit);
+      if (!(ml > 0)) return;
+      var name = c && c.name ? String(c.name) : null;
+      // 1 ml of slack so a 3.4 oz bottle (100.5 ml), which the rules treat as
+      // 100 ml, isn't failed on a rounding.
+      var over = ml > LIQUID_LIMIT_ML + 1 + 1e-9;
+      if (over) oversizeCount++; else { compliantCount++; compliantMl += ml; }
+      items.push({ ml: round(ml, 0), name: name, over: over });
+    });
+
+    var usable = bag.ml * 0.7;
+    var likelyFits = compliantMl <= usable + 1e-9;
+    return {
+      region: region,
+      limitMl: LIQUID_LIMIT_ML,
+      bagMl: bag.ml,
+      bagLabel: bag.label,
+      items: items,
+      compliantCount: compliantCount,
+      oversizeCount: oversizeCount,
+      compliantMl: round(compliantMl, 0),
+      usableMl: round(usable, 0),
+      allUnderLimit: oversizeCount === 0,
+      likelyFits: likelyFits,
+      ok: oversizeCount === 0 && likelyFits && items.length > 0
+    };
+  }
+
   return {
     CM_PER_INCH: CM_PER_INCH,
     LB_PER_KG: LB_PER_KG,
     MAX_SINGLE_BAG_KG: MAX_SINGLE_BAG_KG,
+    LIQUID_LIMIT_ML: LIQUID_LIMIT_ML,
+    LIQUID_BAGS: LIQUID_BAGS,
+    toMl: toMl,
+    checkLiquids: checkLiquids,
     toCm: toCm,
     toKg: toKg,
     round: round,
