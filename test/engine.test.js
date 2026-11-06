@@ -202,3 +202,30 @@ test("liquids: ounces convert to millilitres", function () {
   // the rules treat 3.4 oz as 100 ml, so the 1 ml of slack lets it pass
   assert.strictEqual(r.oversizeCount, 0);
 });
+
+test("powders: a tub at or over 350 ml is flagged for the hold on US flights", function () {
+  var r = E.checkPowders({ containers: [{ ml: 500 }, { ml: 100 }], unit: "ml", usBound: true });
+  assert.strictEqual(r.overCount, 1);
+  assert.strictEqual(r.allUnderLimit, false);
+  assert.strictEqual(r.ok, false);
+  assert.strictEqual(r.items[0].over, true);
+  assert.strictEqual(r.items[1].over, false);
+});
+
+test("powders: small powders are fine", function () {
+  var r = E.checkPowders({ containers: [{ ml: 200 }, { ml: 100 }], unit: "ml", usBound: true });
+  assert.strictEqual(r.overCount, 0);
+  assert.strictEqual(r.ok, true);
+});
+
+test("powders: the same big tub is ok when not flying to the US", function () {
+  var r = E.checkPowders({ containers: [{ ml: 500 }], unit: "ml", usBound: false });
+  assert.strictEqual(r.overCount, 1);
+  assert.strictEqual(r.ok, true); // flagged, but the US rule doesn't apply
+});
+
+test("powders: ounces convert, and a 12 oz tub hits the threshold", function () {
+  var r = E.checkPowders({ containers: [{ ml: 12 }], unit: "oz", usBound: true });
+  // 12 oz ~ 354 ml >= 350
+  assert.strictEqual(r.items[0].over, true);
+});
