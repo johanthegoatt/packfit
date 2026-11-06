@@ -179,6 +179,38 @@
     return rows;
   }
 
+  // Two bags, one over the limit. If the total across your bags fits within the
+  // allowance (number of bags x the per-bag limit), you don't pay an excess fee,
+  // you just move weight from the heavy bag to the light one. This works out
+  // whether that's possible and, for the common two-bag case, how much to shift
+  // so neither bag is over. weights is a list of bag weights in kg.
+  function rebalance(weights, maxKg) {
+    var limit = num(maxKg);
+    var w = (Array.isArray(weights) ? weights : []).map(function (x) { return num(x); }).filter(function (x) { return x >= 0; });
+    if (!(limit > 0) || w.length < 2) return null;
+    var total = w.reduce(function (s, x) { return s + x; }, 0);
+    var n = w.length;
+    var capacity = limit * n;
+    var feasible = total <= capacity + 1e-9;
+    var anyOver = w.some(function (x) { return x > limit + 1e-9; });
+    var move = null;
+    if (n === 2) {
+      var hi = Math.max(w[0], w[1]);
+      move = (hi > limit + 1e-9 && feasible) ? round(hi - limit, 1) : 0;
+    }
+    return {
+      total: round(total, 1),
+      n: n,
+      maxKg: limit,
+      capacity: round(capacity, 1),
+      feasible: feasible,
+      anyOver: anyOver,
+      evenKg: round(total / n, 1),
+      headroomKg: round(capacity - total, 1),
+      moveKg: move
+    };
+  }
+
   // Cabin liquids, the "3-1-1" rule. Two things have to be true: every
   // container is 100 ml (3.4 oz) or less, AND they all fit in one small clear
   // resealable bag (a quart bag in the US, about 0.95 L; a 1-litre bag in the
@@ -237,14 +269,52 @@
     };
   }
 
+  // Powders are a separate rule from liquids. On flights to the United States a
+  // powder-like item of 12 oz / 350 ml or more in the cabin gets pulled for
+  // extra screening, and if the officer can't clear it, it won't be allowed on
+  // board and is thrown away, so a big tub of protein, loose make-up or similar
+  // is better in the hold. There's no general cabin limit on powders outside the
+  // US, but the US rule catches people on connecting and outbound flights.
+  // Baby formula, medicines and ashes are exempt. Threshold in millilitres.
+  var POWDER_LIMIT_ML = 350;
+
+  function checkPowders(opts) {
+    opts = opts || {};
+    var unit = opts.unit === "oz" ? "oz" : "ml";
+    var list = Array.isArray(opts.containers) ? opts.containers : [];
+    var items = [], overCount = 0;
+    list.forEach(function (c) {
+      var raw = c && c.ml != null ? c.ml : c;
+      var ml = toMl(raw, unit);
+      if (!(ml > 0)) return;
+      // A little slack so a 12 oz tub (354 ml), which the rule treats as the
+      // threshold, isn't flagged as over when someone types 350.
+      var over = ml >= POWDER_LIMIT_ML - 1e-9;
+      if (over) overCount++;
+      items.push({ ml: round(ml, 0), over: over });
+    });
+    return {
+      limitMl: POWDER_LIMIT_ML,
+      usRule: opts.usBound !== false,
+      items: items,
+      overCount: overCount,
+      // ok means nothing needs the hold: either no big powders, or you're not
+      // flying to/through the US so the rule doesn't bite.
+      allUnderLimit: overCount === 0,
+      ok: items.length > 0 && (overCount === 0 || opts.usBound === false)
+    };
+  }
+
   return {
     CM_PER_INCH: CM_PER_INCH,
     LB_PER_KG: LB_PER_KG,
     MAX_SINGLE_BAG_KG: MAX_SINGLE_BAG_KG,
     LIQUID_LIMIT_ML: LIQUID_LIMIT_ML,
     LIQUID_BAGS: LIQUID_BAGS,
+    POWDER_LIMIT_ML: POWDER_LIMIT_ML,
     toMl: toMl,
     checkLiquids: checkLiquids,
+    checkPowders: checkPowders,
     toCm: toCm,
     toKg: toKg,
     round: round,
