@@ -324,6 +324,29 @@
       '<div class="liq-pills">' + pills + '</div><p class="liq-msg">' + msg + '</p></div>';
   }
 
+  function recomputePowders() {
+    var host = $("pow-out");
+    if (!host) return;
+    var raw = ($("pow-list").value || "").split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
+    if (!raw.length) { host.innerHTML = ""; return; }
+    var containers = raw.map(function (x) { return { ml: parseFloat(x) }; }).filter(function (c) { return isFinite(c.ml) && c.ml > 0; });
+    var usBound = $("pow-us").value !== "no";
+    var r = E.checkPowders({ unit: $("pow-unit").value, containers: containers, usBound: usBound });
+    if (!r.items.length) { host.innerHTML = ""; return; }
+    var cls = r.ok ? "ok" : "no";
+    var head = r.overCount === 0 ? "All under 350 ml"
+      : !usBound ? (r.overCount + (r.overCount === 1 ? " big powder" : " big powders") + ", but fine outside the US")
+      : (r.overCount + (r.overCount === 1 ? " powder needs" : " powders need") + " the hold");
+    var pills = r.items.map(function (it) {
+      return '<span class="liq-pill ' + (it.over ? "over" : "under") + '">' + it.ml + ' ml' + (it.over ? " ✕" : "") + '</span>';
+    }).join(" ");
+    var msg = r.overCount === 0 ? "All under the 350 ml powder threshold, so they're fine in the cabin."
+      : !usBound ? "No general cabin powder limit outside the US, so these can travel in the cabin; still worth splitting a very big tub in case you connect through the US."
+      : "A powder of 350 ml / 12 oz or more can be pulled and, if it can't be cleared, taken off you. Put the big ones in your checked bag.";
+    host.innerHTML = '<div class="liq-result ' + cls + '"><div class="liq-head">' + head + '</div>' +
+      '<div class="liq-pills">' + pills + '</div><p class="liq-msg">' + msg + '</p></div>';
+  }
+
   Array.prototype.forEach.call($("len-unit").querySelectorAll("button"), function (b) {
     b.addEventListener("click", function () { setLenUnit(b.getAttribute("data-unit")); recompute(); });
   });
@@ -336,6 +359,7 @@
   });
   $("airline").addEventListener("change", function () { Stow.react("airline"); recompute(); });
   ["liq-list", "liq-unit", "liq-region"].forEach(function (id) { var e = $(id); if (e) e.addEventListener("input", recomputeLiquids); if (e) e.addEventListener("change", recomputeLiquids); });
+  ["pow-list", "pow-unit", "pow-us"].forEach(function (id) { var e = $(id); if (e) e.addEventListener("input", recomputePowders); if (e) e.addEventListener("change", recomputePowders); });
   $("cur").addEventListener("change", function () { currency = $("cur").value || "$"; recompute(); });
 
   $("copy").addEventListener("click", function () {

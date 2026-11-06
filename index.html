@@ -122,6 +122,29 @@
     </div>
     <div id="liq-out" aria-live="polite"></div>
     <p class="fine">Separate the sizes with commas. Medicines and baby food are usually allowed over the limit but may be checked on their own, so leave them out here. Rules vary by country and change, so check your airport before you fly.</p>
+
+    <div class="row" style="margin-top:14px">
+      <label class="field">
+        <span>Powders (protein, loose make-up, dry shampoo)</span>
+        <input id="pow-list" inputmode="decimal" placeholder="e.g. 500, 200">
+      </label>
+      <label class="field narrow">
+        <span>in</span>
+        <select id="pow-unit">
+          <option value="ml">ml / g</option>
+          <option value="oz">oz</option>
+        </select>
+      </label>
+      <label class="field narrow">
+        <span>Flying to/via US?</span>
+        <select id="pow-us">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+    </div>
+    <div id="pow-out" aria-live="polite"></div>
+    <p class="fine">Flying to or through the United States, a powder of 350 ml / 12 oz or more in the cabin can be opened and, if it can't be cleared, taken off you, so a big tub is safer in the hold. Baby formula, medicines and ashes are exempt.</p>
   </section>
 </main>
 
