@@ -305,6 +305,75 @@
     };
   }
 
+  // Lithium batteries and power banks. A spare lithium battery or power bank
+  // (anything not installed inside a device) has to travel in the CABIN, never
+  // the checked hold, because a fire in the hold can't be reached. Each one is
+  // graded by its watt-hours (Wh): up to 100 Wh is fine in the cabin with no
+  // sign-off; 100-160 Wh needs the airline's approval and you may carry at most
+  // two spares; over 160 Wh is not allowed in passenger baggage at all. A power
+  // bank is usually labelled in mAh, so from mAh the engine works out the Wh:
+  //   Wh = mAh / 1000 x volts   (most cells are 3.7 V nominal)
+  // So a 20,000 mAh bank is about 74 Wh (fine); a 30,000 mAh is about 111 Wh
+  // (needs approval). Thresholds follow the IATA Lithium Battery guidance and
+  // the FAA PackSafe pages. This is for spares; a battery installed in a device
+  // is treated more leniently.
+  var WH_FREE = 100;       // up to here: cabin, no approval needed
+  var WH_APPROVAL = 160;   // up to here: cabin WITH airline approval, max 2 spares
+  var APPROVAL_MAX = 2;
+  var DEFAULT_VOLTS = 3.7;
+
+  function batteryWh(spec) {
+    spec = spec || {};
+    var wh = num(spec.wh);
+    if (wh > 0) return wh;
+    var mAh = num(spec.mAh);
+    var v = num(spec.v);
+    if (!(v > 0)) v = DEFAULT_VOLTS;
+    if (mAh > 0) return (mAh / 1000) * v;
+    return 0;
+  }
+
+  function gradeBattery(wh) {
+    if (!(wh > 0)) return null;
+    if (wh <= WH_FREE) return "ok";
+    if (wh <= WH_APPROVAL) return "approval";
+    return "banned";
+  }
+
+  function checkBatteries(opts) {
+    opts = opts || {};
+    var list = Array.isArray(opts.batteries) ? opts.batteries : [];
+    var v = num(opts.v);
+    if (!(v > 0)) v = DEFAULT_VOLTS;
+    var items = [], approvalCount = 0, bannedCount = 0, okCount = 0;
+    list.forEach(function (b) {
+      var spec = (b && typeof b === "object") ? b : { mAh: b };
+      var wh = batteryWh({ wh: spec.wh, mAh: spec.mAh, v: spec.v != null ? spec.v : v });
+      var grade = gradeBattery(wh);
+      if (!grade) return;
+      if (grade === "ok") okCount++;
+      else if (grade === "approval") approvalCount++;
+      else bannedCount++;
+      items.push({ wh: round(wh, 1), mAh: spec.mAh != null ? num(spec.mAh) : null, grade: grade });
+    });
+    var tooManyApproval = approvalCount > APPROVAL_MAX;
+    return {
+      volts: v,
+      whFree: WH_FREE,
+      whApproval: WH_APPROVAL,
+      approvalMax: APPROVAL_MAX,
+      items: items,
+      okCount: okCount,
+      approvalCount: approvalCount,
+      bannedCount: bannedCount,
+      tooManyApproval: tooManyApproval,
+      // Everything is fine in the cabin with no approval and nothing banned.
+      ok: items.length > 0 && bannedCount === 0 && approvalCount === 0,
+      // Can still fly, but needs airline approval and/or has a banned item.
+      carriable: items.length > 0 && bannedCount === 0 && !tooManyApproval
+    };
+  }
+
   return {
     CM_PER_INCH: CM_PER_INCH,
     LB_PER_KG: LB_PER_KG,
@@ -312,7 +381,13 @@
     LIQUID_LIMIT_ML: LIQUID_LIMIT_ML,
     LIQUID_BAGS: LIQUID_BAGS,
     POWDER_LIMIT_ML: POWDER_LIMIT_ML,
+    WH_FREE: WH_FREE,
+    WH_APPROVAL: WH_APPROVAL,
+    APPROVAL_MAX: APPROVAL_MAX,
     toMl: toMl,
+    batteryWh: batteryWh,
+    gradeBattery: gradeBattery,
+    checkBatteries: checkBatteries,
     checkLiquids: checkLiquids,
     checkPowders: checkPowders,
     toCm: toCm,
