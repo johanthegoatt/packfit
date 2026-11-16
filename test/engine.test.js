@@ -229,3 +229,50 @@ test("powders: ounces convert, and a 12 oz tub hits the threshold", function () 
   // 12 oz ~ 354 ml >= 350
   assert.strictEqual(r.items[0].over, true);
 });
+
+test("watt-hours from mAh at the cell voltage", function () {
+  // 20,000 mAh at 3.7 V = 74 Wh
+  assert.strictEqual(E.batteryWh({ mAh: 20000 }), 74);
+  // an explicit Wh is used as-is
+  assert.strictEqual(E.batteryWh({ wh: 99 }), 99);
+  // a different voltage changes it
+  assert.ok(E.batteryWh({ mAh: 20000, v: 3.6 }) < 74);
+});
+
+test("battery grades: free, approval, banned", function () {
+  assert.strictEqual(E.gradeBattery(74), "ok");
+  assert.strictEqual(E.gradeBattery(100), "ok");
+  assert.strictEqual(E.gradeBattery(120), "approval");
+  assert.strictEqual(E.gradeBattery(160), "approval");
+  assert.strictEqual(E.gradeBattery(170), "banned");
+});
+
+test("a typical 20,000 mAh power bank is fine in the cabin", function () {
+  var r = E.checkBatteries({ batteries: [{ mAh: 20000 }] });
+  assert.strictEqual(r.items[0].grade, "ok");
+  assert.strictEqual(r.ok, true);
+  assert.strictEqual(r.carriable, true);
+});
+
+test("a 30,000 mAh bank needs airline approval", function () {
+  var r = E.checkBatteries({ batteries: [{ mAh: 30000 }] });
+  // 30,000 mAh at 3.7 V = 111 Wh
+  assert.strictEqual(r.items[0].grade, "approval");
+  assert.strictEqual(r.ok, false);
+  assert.strictEqual(r.carriable, true);
+  assert.strictEqual(r.approvalCount, 1);
+});
+
+test("more than two approval-band batteries is over the limit", function () {
+  var r = E.checkBatteries({ batteries: [{ wh: 120 }, { wh: 120 }, { wh: 120 }] });
+  assert.strictEqual(r.approvalCount, 3);
+  assert.strictEqual(r.tooManyApproval, true);
+  assert.strictEqual(r.carriable, false);
+});
+
+test("over 160 Wh is banned from passenger baggage", function () {
+  var r = E.checkBatteries({ batteries: [{ wh: 200 }] });
+  assert.strictEqual(r.items[0].grade, "banned");
+  assert.strictEqual(r.bannedCount, 1);
+  assert.strictEqual(r.carriable, false);
+});
