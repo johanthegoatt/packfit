@@ -347,6 +347,38 @@
       '<div class="liq-pills">' + pills + '</div><p class="liq-msg">' + msg + '</p></div>';
   }
 
+  function recomputeBatteries() {
+    var host = $("bat-out");
+    if (!host) return;
+    var raw = ($("bat-list").value || "").split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
+    if (!raw.length) { host.innerHTML = ""; return; }
+    var inWh = $("bat-unit").value === "wh";
+    var batteries = raw.map(function (x) {
+      var n = parseFloat(x);
+      return inWh ? { wh: n } : { mAh: n };
+    }).filter(function (b) { return isFinite(b.wh || b.mAh) && (b.wh || b.mAh) > 0; });
+    var r = E.checkBatteries({ batteries: batteries });
+    if (!r.items.length) { host.innerHTML = ""; return; }
+    var cls = r.ok ? "ok" : (r.carriable ? "warn" : "no");
+    var head = r.bannedCount > 0 ? (r.bannedCount + " over 160 Wh — not allowed")
+      : r.tooManyApproval ? "More than two over 100 Wh"
+      : r.approvalCount > 0 ? (r.approvalCount + (r.approvalCount === 1 ? " needs" : " need") + " airline approval")
+      : "All fine in the cabin";
+    var pills = r.items.map(function (it) {
+      var label = it.wh + " Wh";
+      var mark = it.grade === "ok" ? "" : it.grade === "approval" ? " !" : " ✕";
+      var pc = it.grade === "ok" ? "under" : "over";
+      return '<span class="liq-pill ' + pc + '">' + label + mark + '</span>';
+    }).join(" ");
+    var msg = "Power banks and spare batteries must go in your cabin bag, never the hold. "
+      + (r.bannedCount > 0 ? "Anything over 160 Wh can't fly in passenger baggage — leave it behind."
+        : r.tooManyApproval ? "You can carry at most two batteries over 100 Wh, and only with the airline's approval."
+        : r.approvalCount > 0 ? "A battery of 100–160 Wh needs the airline's approval before you fly; up to two are allowed."
+        : "All under 100 Wh, so no approval needed.");
+    host.innerHTML = '<div class="liq-result ' + cls + '"><div class="liq-head">' + head + '</div>' +
+      '<div class="liq-pills">' + pills + '</div><p class="liq-msg">' + msg + '</p></div>';
+  }
+
   Array.prototype.forEach.call($("len-unit").querySelectorAll("button"), function (b) {
     b.addEventListener("click", function () { setLenUnit(b.getAttribute("data-unit")); recompute(); });
   });
@@ -360,6 +392,7 @@
   $("airline").addEventListener("change", function () { Stow.react("airline"); recompute(); });
   ["liq-list", "liq-unit", "liq-region"].forEach(function (id) { var e = $(id); if (e) e.addEventListener("input", recomputeLiquids); if (e) e.addEventListener("change", recomputeLiquids); });
   ["pow-list", "pow-unit", "pow-us"].forEach(function (id) { var e = $(id); if (e) e.addEventListener("input", recomputePowders); if (e) e.addEventListener("change", recomputePowders); });
+  ["bat-list", "bat-unit"].forEach(function (id) { var e = $(id); if (e) e.addEventListener("input", recomputeBatteries); if (e) e.addEventListener("change", recomputeBatteries); });
   $("cur").addEventListener("change", function () { currency = $("cur").value || "$"; recompute(); });
 
   $("copy").addEventListener("click", function () {
